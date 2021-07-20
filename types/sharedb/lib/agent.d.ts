@@ -23,14 +23,14 @@ declare class Agent {
          * `true` if this is agent is handling a ShareDB client in the same
          * Node process.
          */
-        isServer?: boolean;
+        isServer?: boolean | undefined;
     };
     /**
      * Object for custom use in middleware to store app-specific state for a
      * given client session. It is in memory only as long as the session is
      * active, and it is passed to each middleware call.
      */
-    custom: Agent.Custom;
+    custom: any;
 
     /**
      * Sends a JSON-compatible message to the client for this agent.
@@ -38,10 +38,4 @@ declare class Agent {
      * @param message
      */
     send(message: JSONObject): void;
-}
-
-declare namespace Agent {
-    interface Custom {
-        [key: string]: unknown;
-    }
 }

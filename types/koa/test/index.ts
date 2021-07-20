@@ -2,7 +2,7 @@ import Koa = require('koa');
 
 declare module 'koa' {
     interface ExtendableContext {
-        errors?: Error[];
+        errors?: Error[] | undefined;
     }
 }
 
@@ -45,6 +45,23 @@ app.use((ctx, next) => {
         console.log(`${ctx.method} ${ctx.url} - ${ms}ms`);
         ctx.assert(true, 404, 'Yep!');
     });
+});
+
+app.use(ctx => {
+    ctx.accepts(); // $ExpectType string[]
+    ctx.accepts(''); // $ExpectType string | false
+    ctx.accepts(['']); // $ExpectType string | false
+    ctx.acceptsEncodings(); // $ExpectType string[]
+    ctx.acceptsEncodings(''); // $ExpectType string | false
+    ctx.acceptsEncodings(['']); // $ExpectType string | false
+    ctx.acceptsCharsets(); // $ExpectType string[]
+    ctx.acceptsCharsets(''); // $ExpectType string | false
+    ctx.acceptsCharsets(['']); // $ExpectType string | false
+    ctx.acceptsLanguages(); // $ExpectType string[]
+    ctx.acceptsLanguages(''); // $ExpectType string | false
+    ctx.acceptsLanguages(['']); // $ExpectType string | false
+    ctx.is(''); // $ExpectType string | false | null
+    ctx.is(['']); // $ExpectType string | false | null
 });
 
 // response

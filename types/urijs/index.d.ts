@@ -35,10 +35,10 @@ declare const URI: {
     addQuery(data: object, qryObj: object): object;
 
     build(parts: URI.URIOptions): string;
-    buildAuthority(parts: { username?: string; password?: string; hostname?: string; port?: string }): string;
-    buildHost(parts: { hostname?: string; port?: string }): string;
-    buildQuery(qry: object, duplicates?: boolean): string;
-    buildUserinfo(parts: { username?: string; password?: string }): string;
+    buildAuthority(parts: { username?: string | undefined; password?: string | undefined; hostname?: string | undefined; port?: string | undefined }): string;
+    buildHost(parts: { hostname?: string | undefined; port?: string | undefined }): string;
+    buildQuery(data: object, duplicateQueryParameters?: boolean, escapeQuerySpace?: boolean): string;
+    buildUserinfo(parts: { username?: string | undefined; password?: string | undefined }): string;
 
     commonPath(path1: string, path2: string): string;
 
@@ -57,7 +57,7 @@ declare const URI: {
      * @description Wrapper for `URITemplate#expand`. Only present after
      *              importing `urijs/src/URITemplate` explicitly.
      */
-    expand?: (template: string, vals: object) => string;
+    expand?: ((template: string, vals: object) => string) | undefined;
 
     iso8859(): void;
 
@@ -67,25 +67,25 @@ declare const URI: {
     parseAuthority(
         url: string,
         parts: {
-            username?: string;
-            password?: string;
-            hostname?: string;
-            port?: string;
+            username?: string | undefined;
+            password?: string | undefined;
+            hostname?: string | undefined;
+            port?: string | undefined;
         },
     ): string;
     parseHost(
         url: string,
         parts: {
-            hostname?: string;
-            port?: string;
+            hostname?: string | undefined;
+            port?: string | undefined;
         },
     ): string;
     parseQuery(url: string): URI.QueryDataMap;
     parseUserinfo(
         url: string,
         parts: {
-            username?: string;
-            password?: string;
+            username?: string | undefined;
+            password?: string | undefined;
         },
     ): string;
 
@@ -96,20 +96,20 @@ declare const URI: {
 
     unicode(): void;
 
-    withinString(source: string, func: (url: string) => string): string;
+    withinString(source: string, func: (url: string, start: number, end: number, source: string) => string): string;
 };
 
 declare namespace URI {
     interface URIOptions {
-        protocol?: string;
-        username?: string;
-        password?: string;
-        hostname?: string;
-        port?: string;
-        path?: string;
-        query?: string;
-        fragment?: string;
-        urn?: boolean;
+        protocol?: string | undefined;
+        username?: string | undefined;
+        password?: string | undefined;
+        hostname?: string | undefined;
+        port?: string | undefined;
+        path?: string | undefined;
+        query?: string | undefined;
+        fragment?: string | undefined;
+        urn?: boolean | undefined;
     }
 
     interface Parts extends URIOptions {

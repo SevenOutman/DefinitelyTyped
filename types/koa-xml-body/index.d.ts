@@ -2,7 +2,7 @@
 // Project: https://github.com/creeperyang/koa-xml-body
 // Definitions by: Ulf Winkelvos <https://github.com/uwinkelvos>
 // Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
-// TypeScript Version: 2.3
+// TypeScript Version: 3.5
 
 /* =================== USAGE ===================
 
@@ -20,7 +20,7 @@
 
 import * as Koa from "koa";
 
-import { Options as Xml2jsOptions } from "xml2js";
+import { ParserOptions as Xml2jsOptions } from "xml2js";
 
 declare module "koa" {
     interface Request {
@@ -30,15 +30,15 @@ declare module "koa" {
 
 declare function bodyParser(opts?: {
     // requested encoding. Default is utf8. If not set, the lib will retrive it from content-type(such as content-type:application/xml;charset=gb2312).
-    encoding?: string
+    encoding?: string | undefined
     // limit of the body. If the body ends up being larger than this limit, a 413 error code is returned. Default is 1mb.
-    limit?: number
+    limit?: number | undefined
     // length of the body. When content-length is found, it will be overwritten automatically.
-    length?: number
+    length?: number | undefined
     // error handler. Default is a noop function. It means it will eat the error silently. You can config it to customize the response.
-    onerror?: (err: Error, ctx: Koa.Context) => void;
+    onerror?: ((err: Error, ctx: Koa.Context) => void) | undefined;
     // options which will be used to parse xml. Default is {}. See xml2js Options for details.
-    xmlOptions?: Xml2jsOptions
+    xmlOptions?: Xml2jsOptions | undefined
 }): Koa.Middleware;
 
 declare namespace bodyParser { }

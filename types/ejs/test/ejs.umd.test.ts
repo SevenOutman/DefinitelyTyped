@@ -22,10 +22,10 @@ ejs.cache;
 ejs.delimiter;
 
 expectType<{
-    (template: string, opts: ejs.Options & { async: true; client?: false }): ejs.AsyncTemplateFunction;
+    (template: string, opts: ejs.Options & { async: true; client?: false | undefined }): ejs.AsyncTemplateFunction;
     (template: string, opts: ejs.Options & { async: true; client: true }): ejs.AsyncClientFunction;
-    (template: string, opts?: ejs.Options & { async?: false; client?: false }): ejs.TemplateFunction;
-    (template: string, opts?: ejs.Options & { async?: false; client: true }): ejs.ClientFunction;
+    (template: string, opts?: ejs.Options & { async?: false | undefined; client?: false | undefined }): ejs.TemplateFunction;
+    (template: string, opts?: ejs.Options & { async?: false | undefined; client: true }): ejs.ClientFunction;
     (template: string, opts?: ejs.Options): ejs.AsyncTemplateFunction | ejs.TemplateFunction;
 }>(ejs.compile);
 
@@ -43,8 +43,9 @@ expectType<{
     (path: string, data?: ejs.Data, opts?: ejs.Options): Promise<string>;
 }>(ejs.renderFile);
 
-// https://github.com/mde/ejs#options
+/** @see https://github.com/mde/ejs#options */
 const renderOptions: ejs.Options = {
     beautify: true,
     filename: './index.ejs',
+    views: ['dir1', 'dir2'],
 };

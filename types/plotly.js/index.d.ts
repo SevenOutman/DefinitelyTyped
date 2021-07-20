@@ -19,14 +19,19 @@
 //                 Brandon Mitchell <https://github.com/brammitch>
 //                 Jessica Blizzard <https://github.com/blizzardjessica>
 //                 Oleg Shilov <https://github.com/olegshilov>
+//                 Pablo Gracia <https://github.com/PabloGracia>
+//                 Jeffrey van Gogh <https://github.com/jvgogh>
 // Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
 
 import * as _d3 from 'd3';
-import { BoxPlotData } from './lib/traces/box';
+import { BoxPlotData, BoxPlotMarker } from './lib/traces/box';
 import { ViolinData } from './lib/traces/violin';
+import { OhclData } from './lib/traces/ohcl';
+import { CandlestickData } from './lib/traces/candlestick';
+import { PieData } from './lib/traces/pie';
 
 export as namespace Plotly;
-export { BoxPlotData, ViolinData };
+export { BoxPlotData, ViolinData, OhclData, CandlestickData, PieData };
 
 export interface StaticPlots {
     resize(root: Root): void;
@@ -83,8 +88,8 @@ export type PlotSelectedData = Partial<PlotDatum>;
 
 export interface PlotSelectionEvent {
     points: PlotDatum[];
-    range?: SelectionRange;
-    lassoPoints?: SelectionRange;
+    range?: SelectionRange | undefined;
+    lassoPoints?: SelectionRange | undefined;
 }
 
 export interface PlotRestyleEventUpdate {
@@ -100,12 +105,12 @@ export interface PlotScene {
 }
 
 export interface PlotRelayoutEvent extends Partial<Layout> {
-    'xaxis.range[0]'?: number;
-    'xaxis.range[1]'?: number;
-    'yaxis.range[0]'?: number;
-    'yaxis.range[1]'?: number;
-    'xaxis.autorange'?: boolean;
-    'yaxis.autorange'?: boolean;
+    'xaxis.range[0]'?: number | undefined;
+    'xaxis.range[1]'?: number | undefined;
+    'yaxis.range[0]'?: number | undefined;
+    'yaxis.range[1]'?: number | undefined;
+    'xaxis.autorange'?: boolean | undefined;
+    'yaxis.autorange'?: boolean | undefined;
 }
 
 export interface ClickAnnotationEvent {
@@ -275,7 +280,7 @@ export interface ToImgopts {
     format: 'jpeg' | 'png' | 'webp' | 'svg';
     width: number;
     height: number;
-    scale?: number;
+    scale?: number | undefined;
 }
 
 export interface DownloadImgopts {
@@ -434,6 +439,7 @@ export interface Layout {
     barnorm: '' | 'fraction' | 'percent';
     bargap: number;
     bargroupgap: number;
+    boxmode: 'group' | 'overlay';
     selectdirection: 'h' | 'v' | 'd' | 'any';
     hiddenlabels: string[];
     grid: Partial<{
@@ -464,6 +470,11 @@ export interface Layout {
     polar9: Partial<PolarLayout>;
     transition: Transition;
     template: Template;
+    clickmode: 'event' | 'select' | 'event+select' | 'none';
+    uirevision: number | string;
+    datarevision: number | string;
+    editrevision: number | string;
+    selectionrevision: number | string;
 }
 
 export interface Legend extends Label {
@@ -770,10 +781,8 @@ export type Calendar =
     | 'thai'
     | 'ummalqura';
 
-export type XAxisName =
-    | 'x' | 'x2' | 'x3' | 'x4' | 'x5' | 'x6' | 'x7' | 'x8' | 'x9' | 'x10' | 'x11';
-export type YAxisName =
-    | 'y' | 'y2' | 'y3' | 'y4' | 'y5' | 'y6' | 'y7' | 'y8' | 'y9' | 'y10' | 'y11';
+export type XAxisName = 'x' | 'x2' | 'x3' | 'x4' | 'x5' | 'x6' | 'x7' | 'x8' | 'x9' | 'x10' | 'x11';
+export type YAxisName = 'y' | 'y2' | 'y3' | 'y4' | 'y5' | 'y6' | 'y7' | 'y8' | 'y9' | 'y10' | 'y11';
 export type AxisName = XAxisName | YAxisName;
 
 export interface LayoutAxis extends Axis {
@@ -871,14 +880,14 @@ export type ModeBarDefaultButtons =
 export type ButtonClickEvent = (gd: PlotlyHTMLElement, ev: MouseEvent) => void;
 
 export interface Icon {
-    height?: number;
-    width?: number;
-    ascent?: number;
-    descent?: number;
-    name?: string;
-    path?: string;
-    svg?: string;
-    transform?: string;
+    height?: number | undefined;
+    width?: number | undefined;
+    ascent?: number | undefined;
+    descent?: number | undefined;
+    name?: string | undefined;
+    path?: string | undefined;
+    svg?: string | undefined;
+    transform?: string | undefined;
 }
 
 export interface ModeBarButton {
@@ -898,7 +907,7 @@ export interface ModeBarButton {
     icon: string | Icon;
 
     /** icon positioning */
-    gravity?: string;
+    gravity?: string | undefined;
 
     /**
      * click handler associated with the button, a function of
@@ -911,13 +920,13 @@ export interface ModeBarButton {
      * attribute associated with button,
      * use this with 'val' to keep track of the state
      */
-    attr?: string;
+    attr?: string | undefined;
 
     /** initial 'attr' value, can be a function of gd */
     val?: any;
 
     /** is the button a toggle button? */
-    toggle?: boolean;
+    toggle?: boolean | undefined;
 }
 
 export interface GaugeLine {
@@ -983,8 +992,8 @@ export interface PlotNumber {
 }
 
 export interface Template {
-    data?: { [type in PlotType]?: Partial<PlotData> };
-    layout?: Partial<Layout>;
+    data?: { [type in PlotType]?: Partial<PlotData> } | undefined;
+    layout?: Partial<Layout> | undefined;
 }
 
 // Data
@@ -1015,12 +1024,12 @@ export type ErrorBar = Partial<ErrorOptions> &
         | {
               type: 'constant' | 'percent';
               value: number;
-              valueminus?: number;
+              valueminus?: number | undefined;
           }
         | {
               type: 'data';
               array: Datum[];
-              arrayminus?: Datum[];
+              arrayminus?: Datum[] | undefined;
           }
     );
 
@@ -1074,7 +1083,14 @@ export type PlotType =
     | 'volume'
     | 'waterfall';
 
-export type Data = Partial<PlotData> | Partial<BoxPlotData> | Partial<ViolinData>;
+export type Data =
+    | Partial<PlotData>
+    | Partial<BoxPlotData>
+    | Partial<ViolinData>
+    | Partial<OhclData>
+    | Partial<CandlestickData>
+    | Partial<PieData>;
+
 export type Color =
     | string
     | number
@@ -1108,7 +1124,7 @@ export interface PlotData {
     'line.shape': 'linear' | 'spline' | 'hv' | 'vh' | 'hvh' | 'vhv';
     'line.smoothing': number;
     'line.simplify': boolean;
-    marker: Partial<PlotMarker>;
+    marker: Partial<PlotMarker> | Partial<BoxPlotMarker>;
     'marker.symbol': MarkerSymbol | MarkerSymbol[];
     'marker.color': Color;
     'marker.colorscale': ColorScale | ColorScale[];
@@ -1271,6 +1287,12 @@ export interface PlotData {
     branchvalues: 'total' | 'remainder';
     ids: string[];
     level: string;
+    cliponaxis: boolean;
+    automargin: boolean;
+    locationmode: 'ISO-3' | 'USA-states' | 'country names' | 'geojson-id';
+    locations: Datum[];
+    reversescale: boolean;
+    colorbar: Partial<ColorBar>;
 }
 
 /**
@@ -1284,9 +1306,9 @@ export interface TransformStyle {
 
 export interface TransformAggregation {
     target: string;
-    func?: 'count' | 'sum' | 'avg' | 'median' | 'mode' | 'rms' | 'stddev' | 'min' | 'max' | 'first' | 'last';
-    funcmode?: 'sample' | 'population';
-    enabled?: boolean;
+    func?: 'count' | 'sum' | 'avg' | 'median' | 'mode' | 'rms' | 'stddev' | 'min' | 'max' | 'first' | 'last' | undefined;
+    funcmode?: 'sample' | 'population' | undefined;
+    enabled?: boolean | undefined;
 }
 
 export interface Transform {
@@ -1357,32 +1379,32 @@ export type MarkerSymbol = string | number | Array<string | number>;
  */
 export interface PlotMarker {
     symbol: MarkerSymbol;
-    color: Color | Color[];
-    colors: Color[];
-    colorscale: ColorScale;
-    cauto: boolean;
-    cmax: number;
-    cmin: number;
-    autocolorscale: boolean;
-    reversescale: boolean;
+    color?: Color | Color[] | undefined;
+    colors?: Color[] | undefined;
+    colorscale?: ColorScale | undefined;
+    cauto?: boolean | undefined;
+    cmax?: number | undefined;
+    cmin?: number | undefined;
+    autocolorscale?: boolean | undefined;
+    reversescale?: boolean | undefined;
     opacity: number | number[];
     size: number | number[];
-    maxdisplayed: number;
-    sizeref: number;
-    sizemax: number;
-    sizemin: number;
-    sizemode: 'diameter' | 'area';
-    showscale: boolean;
+    maxdisplayed?: number | undefined;
+    sizeref?: number | undefined;
+    sizemax?: number | undefined;
+    sizemin?: number | undefined;
+    sizemode?: 'diameter' | 'area' | undefined;
+    showscale?: boolean | undefined;
     line: Partial<ScatterMarkerLine>;
-    pad: Partial<Padding>;
-    width: number;
-    colorbar: Partial<ColorBar>;
-    gradient: {
+    pad?: Partial<Padding> | undefined;
+    width?: number | undefined;
+    colorbar?: Partial<ColorBar> | undefined;
+    gradient?: {
         type: 'radial' | 'horizontal' | 'vertical' | 'none';
         color: Color;
         typesrc: any;
         colorsrc: any;
-    };
+    } | undefined;
 }
 
 export type ScatterMarker = PlotMarker;
@@ -1390,12 +1412,14 @@ export type ScatterMarker = PlotMarker;
 export interface ScatterMarkerLine {
     width: number | number[];
     color: Color;
-    colorscale: ColorScale;
-    cauto: boolean;
-    cmax: number;
-    cmin: number;
-    autocolorscale: boolean;
-    reversescale: boolean;
+    cauto?: boolean | undefined;
+    cmax?: number | undefined;
+    cmin?: number | undefined;
+    cmid?: number | undefined;
+    colorscale?: ColorScale | undefined;
+    autocolorscale?: boolean | undefined;
+    reversescale?: boolean | undefined;
+    coloraxis?: string | undefined;
 }
 
 export interface ScatterLine {
@@ -1538,7 +1562,7 @@ export interface Config {
      * buttons config objects or names of default buttons
      * (see ./components/modebar/buttons.js for more info)
      */
-    modeBarButtons: ModeBarDefaultButtons[][] | ModeBarButton[][] | false;
+    modeBarButtons: Array<ModeBarDefaultButtons[] | ModeBarButton[]> | false;
 
     /** add the plotly logo on the end of the mode bar */
     displaylogo: boolean;
@@ -2017,7 +2041,7 @@ export interface Transition {
      * Determines whether the figure's layout or traces smoothly transitions during updates that make both traces
      * and layout change. Default is "layout first".
      */
-    ordering?: 'layout first' | 'traces first';
+    ordering?: 'layout first' | 'traces first' | undefined;
 }
 
 export interface SliderStep {
@@ -2126,33 +2150,7 @@ export interface Slider {
      */
     yanchor: 'auto' | 'top' | 'middle' | 'bottom';
     transition: Transition;
-    currentvalue: {
-        /**
-         * Shows the currently-selected value above the slider.
-         */
-        visible: boolean;
-        /**
-         * The alignment of the value readout relative to the length of the slider.
-         */
-        xanchor: 'left' | 'center' | 'right';
-        /**
-         * The amount of space, in pixels, between the current value label
-         * and the slider.
-         */
-        offset: number;
-        /**
-         * When currentvalue.visible is true, this sets the prefix of the label.
-         */
-        prefix: string;
-        /**
-         * When currentvalue.visible is true, this sets the suffix of the label.
-         */
-        suffix: string;
-        /**
-         * Sets the font of the current value label text.
-         */
-        font: Partial<Font>;
-    };
+    currentvalue: Partial<CurrentValue>;
     /**
      * Sets the font of the slider step labels.
      */
@@ -2190,4 +2188,32 @@ export interface Slider {
      * Sets the length in pixels of minor step tick marks
      */
     minorticklen: number;
+}
+
+export interface CurrentValue {
+  /**
+   * Shows the currently-selected value above the slider.
+   */
+  visible: boolean;
+  /**
+   * The alignment of the value readout relative to the length of the slider.
+   */
+  xanchor: 'left' | 'center' | 'right';
+  /**
+   * The amount of space, in pixels, between the current value label
+   * and the slider.
+   */
+  offset: number;
+  /**
+   * When currentvalue.visible is true, this sets the prefix of the label.
+   */
+  prefix: string;
+  /**
+   * When currentvalue.visible is true, this sets the suffix of the label.
+   */
+  suffix: string;
+  /**
+   * Sets the font of the current value label text.
+   */
+  font: Partial<Font>;
 }

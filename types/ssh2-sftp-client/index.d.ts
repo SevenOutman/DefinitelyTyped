@@ -16,12 +16,14 @@ import * as ssh2 from 'ssh2';
 
 export = sftp;
 
+type FileInfoType = 'd' | '-' | 'l';
+
 declare class sftp {
     connect(options: sftp.ConnectOptions): Promise<ssh2.SFTPWrapper>;
 
     list(remoteFilePath: string, pattern?: string | RegExp): Promise<sftp.FileInfo[]>;
 
-    exists(remotePath: string): Promise<false | 'd' | '-' | 'l'>;
+    exists(remotePath: string): Promise<false | FileInfoType>;
 
     stat(remotePath: string): Promise<sftp.FileStats>;
 
@@ -55,11 +57,7 @@ declare class sftp {
 
     chmod(remotePath: string, mode: number | string): Promise<string>;
 
-    append(
-        input: Buffer | NodeJS.ReadableStream,
-        remotePath: string,
-        options?: sftp.TransferOptions,
-    ): Promise<string>;
+    append(input: Buffer | NodeJS.ReadableStream, remotePath: string, options?: sftp.TransferOptions): Promise<string>;
 
     uploadDir(srcDir: string, destDir: string): Promise<string>;
 
@@ -76,35 +74,35 @@ declare class sftp {
 
 declare namespace sftp {
     interface ConnectOptions extends ssh2.ConnectConfig {
-        retries?: number;
-        retry_factor?: number;
-        retry_minTimeout?: number;
+        retries?: number | undefined;
+        retry_factor?: number | undefined;
+        retry_minTimeout?: number | undefined;
     }
 
     interface ModeOption {
-        mode?: number;
+        mode?: number | undefined;
     }
 
     interface TransferOptions extends ModeOption {
-        flags?: 'w' | 'a';
-        encoding?: null | string;
-        autoClose?: true | boolean;
+        flags?: 'w' | 'a' | undefined;
+        encoding?: null | string | undefined;
+        autoClose?: true | boolean | undefined;
     }
 
     interface GetTransferOptions extends TransferOptions {
-        handle?: null | string;
+        handle?: null | string | undefined;
     }
 
     interface FastGetTransferOptions {
-        concurrency?: number;
-        chunkSize?: number;
-        step?: (totalTransferred: number, chunk: number, total: number) => void;
+        concurrency?: number | undefined;
+        chunkSize?: number | undefined;
+        step?: ((totalTransferred: number, chunk: number, total: number) => void) | undefined;
     }
 
     interface FastPutTransferOptions extends FastGetTransferOptions, ModeOption {}
 
     interface FileInfo {
-        type: string;
+        type: FileInfoType;
         name: string;
         size: number;
         modifyTime: number;

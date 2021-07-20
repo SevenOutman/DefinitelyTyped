@@ -73,6 +73,18 @@ class BadVariablePlugin implements Plugin {
     };
 }
 
+// Test serverless cli log with no message
+serverless.cli.log(); // $ExpectError
+
+// Test serverless cli log with no entity
+serverless.cli.log('updating stack...');
+
+// Test serverless cli log with no options
+serverless.cli.log('updating stack...', 'serverless');
+
+// Test serverless cli log with all args supplied
+serverless.cli.log('updating stack...', 'serverless', { color: 'orange', bold: true, underline: true, entity: 'serverless' });
+
 // Test provider's 'request' method
 const provider = serverless.getProvider('aws');
 provider.request('AccessAnalyzer', 'createAnalyzer');
@@ -90,6 +102,9 @@ provider.request(
         region: 'us-east-1',
     },
 );
+
+// Test provider's 'getServerlessDeploymentBucketName'
+provider.getServerlessDeploymentBucketName().then(bucketName => {});
 
 // Test ApiGateway validator
 getHttp(
@@ -122,6 +137,7 @@ const awsServerless: Aws.Serverless = {
     },
     frameworkVersion: 'testFrameworkVersion',
     configValidationMode: 'error',
+    variablesResolutionMode: '20210219',
     provider: {
         name: 'aws',
         runtime: 'testRuntime',
@@ -166,7 +182,7 @@ const awsServerless: Aws.Serverless = {
                 testrestapiresource: 'testrestapiresource'
             },
             websocketApiId: 'testwebsocketApiId',
-            apiKeySourceType: 'testapiKeySourceType',
+            apiKeySourceType: 'HEADER',
             minimumCompressionSize: 1,
             description: 'testdescription',
             binaryMediaTypes: ['testbinaryMediaTypes']
@@ -308,13 +324,13 @@ const awsServerless: Aws.Serverless = {
                 accessLogging: false,
                 format: 'testformat',
                 executionLogging: false,
-                level: 'testlevel',
+                level: 'ERROR',
                 fullExecutionData: false,
                 role: 'testrole',
                 roleManagedExternally: false,
             },
             websocket: {
-                level: 'testlevel'
+                level: 'INFO'
             },
             httpApi: {
                 format: 'testformat'
@@ -325,6 +341,7 @@ const awsServerless: Aws.Serverless = {
     package: {
         include: ['testinclude'],
         exclude: ['testexclude'],
+        patterns: ['!testpatternexclude', 'testpatterninclude'],
         excludeDevDependencies: false,
         artifact: 'testartifact',
         individually: true
@@ -358,12 +375,13 @@ const awsServerless: Aws.Serverless = {
             package: {
                 include: ['testinclude'],
                 exclude: ['testexclude'],
+                patterns: ['!testpatternexclude', 'testpatterninclude'],
                 excludeDevDependencies: false,
                 artifact: 'testartifact',
                 individually: true
             },
             layers: ['testlayers'],
-            tracing: 'testtracing',
+            tracing: 'PassThrough',
             condition: 'testcondition',
             dependsOn: ['testdependson'],
             destinations: {
@@ -408,7 +426,14 @@ const awsServerless: Aws.Serverless = {
                                 },
                             },
                             schema: {
-                                'application/json': 'schema1'
+                                'application/json': {
+                                    type: 'object',
+                                    properties: {
+                                        productId: {
+                                            type: 'integer'
+                                        }
+                                    }
+                                }
                             },
                         }
                     },
@@ -454,13 +479,35 @@ const awsServerless: Aws.Serverless = {
                         existing: false
                     }
                 }, {
+                    s3: {
+                        bucket: 'testbucket',
+                        event: 'testevent',
+                        rules: [
+                            {
+                                prefix: 'testprefix',
+                            }
+                        ],
+                        existing: false
+                    }
+                }, {
+                    s3: {
+                        bucket: 'testbucket',
+                        event: 'testevent',
+                        rules: [
+                            {
+                                suffix: 'testsuffix',
+                            }
+                        ],
+                        existing: false
+                    }
+                }, {
                     schedule: '1',
                 }, {
                     sns: {
                         arn: 'testarn',
                         topicName: 'testtopicName',
                         displayName: 'testdisplayName',
-                        filterPolicy: ['testfilterpolicy'],
+                        filterPolicy: { testFilterPolicy: 'testfilterpolicy' },
                         redrivePolicy: {
                             deadLetterTargetArn: 'testdeadLetterTargetArn',
                             deadLetterTargetRef: 'testdeadLetterTargetRef',
@@ -482,6 +529,14 @@ const awsServerless: Aws.Serverless = {
                         arn: 'testarn',
                         batchSize: 1,
                         startingPosition: 1,
+                        enabled: true
+                    }
+                }, {
+                    msk: {
+                        arn: 'testarn',
+                        topic: 'testTopic',
+                        batchSize: 1,
+                        startingPosition: 'LATEST',
                         enabled: true
                     }
                 }, {
@@ -618,11 +673,182 @@ const awsServerless: Aws.Serverless = {
                 Export: {
                     Name: 'testname',
                 },
-                Condition: 'testcondition'
-            }
-        }
-    }
+                Condition: 'testcondition',
+            },
+            testFunctionLambdaFunctionQualifiedArn: {
+                Description: 'testDescription',
+                Export: {
+                    Name: 'testFunctionLambdaFunctionQualifiedArn',
+                },
+            },
+        },
+    },
 };
+
+// vpc can be set as a reference to some section of the config file
+// e.g. ${self:custom.vpc.${self:provider.stage}}
+awsServerless.provider.vpc = 'serverless reference';
+awsServerless.functions![0].vpc = 'serverless reference';
+
+const bunchOfConfigs: Aws.Serverless[] = [
+    {
+        service: 'users',
+        provider: { name: 'aws' },
+        functions: {}
+    },
+    {
+        service: 'users',
+        useDotenv: true,
+        provider: { name: 'aws' },
+        functions: {}
+    },
+    {
+        service: 'users',
+        configValidationMode: 'off',
+        unresolvedVariablesNotificationMode: 'error',
+        provider: { name: 'aws' },
+        functions: {}
+    },
+    {
+        service: 'users',
+        disabledDeprecations: [
+            '*'
+        ],
+        provider: { name: 'aws' },
+        functions: {}
+    },
+    {
+        service: 'users',
+        provider: {
+            name: 'aws',
+            iam: {
+                role: {
+                    name: 'aws',
+                    permissionBoundary: 'testpermissionsBoundary',
+                    managedPolicies: ['testmanagedPolicies'],
+                    statements: [
+                        {
+                            Effect: 'Allow',
+                            Sid: 'testSid',
+                            Condition: {
+                                testcondition: 'testconditionvalue'
+                            },
+                            Action: 'testAction',
+                            NotAction: 'testNotAction',
+                            Resource: 'testResource',
+                            NotResource: 'testNotResource'
+                        }
+                    ],
+                    tags: {
+                        testtagkey: 'testtagvalue'
+                    }
+                }
+            }
+        },
+        functions: {}
+    },
+    {
+        service: 'users',
+        provider: {
+            name: 'aws',
+            iam: {
+                role: 'testrole',
+            }
+        },
+        functions: {}
+    },
+    {
+        service: 'users',
+        provider: {
+            name: 'aws',
+            iam: {
+                deploymentRole: 'testdeploymentRole'
+            }
+        },
+        functions: {}
+    }
+];
 
 // Test Aws Class
 const aws = new Aws(serverless, options);
+
+class PluginAddingComponentsInConstructor implements Plugin {
+    hooks: Plugin.Hooks;
+    constructor(serverless: Serverless) {
+        this.hooks = {};
+        if (typeof serverless.service === 'string') {
+            throw new Error();
+        }
+        serverless.service.functions['myNewFunction'] = {
+            events: [
+                {
+                    sqs: {
+                        arn: { 'Fn::GetAtt': ['myQueue', 'Arn'] },
+                        batchSize: 1,
+                    },
+                },
+            ],
+            handler: 'myLambda.handler',
+            reservedConcurrency: 2,
+            timeout: 300,
+        };
+        serverless.service.resources.Resources['myDLQ'] = {
+            Properties: {
+                QueueName: 'myDLQ',
+            },
+            Type: 'AWS::SQS::Queue',
+        };
+        serverless.service.resources.Resources['myQueue'] = {
+            Properties: {
+                DelaySeconds: 60,
+                QueueName: 'myQueue',
+                RedrivePolicy: {
+                    deadLetterTargetArn: { 'Fn::GetAtt': ['myDLQ', 'Arn'] },
+                    maxReceiveCount: 3,
+                },
+                VisibilityTimeout: 360,
+            },
+            Type: 'AWS::SQS::Queue',
+        };
+        serverless.service.resources.Resources['myPolicy'] = {
+            Properties: {
+                PolicyDocument: {
+                    Statement: [
+                        {
+                            Action: 'SQS:SendMessage',
+                            Condition: {
+                                ArnEquals: {
+                                    'aws:SourceArn': 'my-sns-topic-arn',
+                                },
+                            },
+                            Effect: 'Allow',
+                            Principal: '*',
+                            Resource: { 'Fn::GetAtt': ['myQueue', 'Arn'] },
+                            Sid: 'allow-sns-messages',
+                        },
+                    ],
+                    Version: '2012-10-17',
+                },
+                Queues: [
+                    {
+                        Ref: 'myQueue',
+                    },
+                ],
+            },
+            Type: 'AWS::SQS::QueuePolicy',
+        };
+        if (serverless.service.resources.Resources === undefined) {
+            serverless.service.resources.Resources = {};
+        }
+        serverless.service.resources.Resources['mySubscription'] = {
+            Properties: {
+                Endpoint: { 'Fn::GetAtt': ['myQueue', 'Arn'] },
+                FilterPolicy: { MyAttribute: 'myValue' },
+                Protocol: 'sqs',
+                RawMessageDelivery: 'true',
+                TopicArn: 'my-sns-topic-arn',
+            },
+            Type: 'AWS::SNS::Subscription',
+        };
+    }
+}

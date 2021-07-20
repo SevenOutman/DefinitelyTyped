@@ -74,6 +74,13 @@ auth0.webAuth.authorize({
     prompt: 'login',
 });
 
+auth0.webAuth.authorize({
+    state: 'state',
+    nonce: 'nonce',
+    scope: 'openid',
+    max_age: 10,
+});
+
 // handle additional options object
 auth0.webAuth.authorize(
     {
@@ -151,6 +158,8 @@ auth0.auth.passwordlessWithEmail({
 
 auth0.auth.passwordlessWithSMS({
     phoneNumber: '+5491159991000',
+    send: 'code',
+    authParams: { scope: 'openid offline_access' },
 });
 
 auth0.auth.loginWithEmail({

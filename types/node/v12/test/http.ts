@@ -120,6 +120,9 @@ import * as net from 'net';
 
     // path
     const path: string = req.path;
+
+    // method
+    const method: string = req.method;
 }
 
 {
@@ -134,7 +137,8 @@ import * as net from 'net';
         keepAliveMsecs: 10000,
         maxSockets: Infinity,
         maxFreeSockets: 256,
-        timeout: 15000
+        scheduling: 'lifo',
+        timeout: 15000,
     });
 
     agent = http.globalAgent;

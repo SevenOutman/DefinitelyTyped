@@ -1,4 +1,4 @@
-// Type definitions for ziggy-js 0.9
+// Type definitions for ziggy-js 1.0
 // Project: https://github.com/tightenco/ziggy#readme
 // Definitions by: Ben Allfree <https://github.com/benallfree>
 // Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
@@ -23,7 +23,7 @@ export type InputParams = NormalizedParams | InputValue;
 export interface Route {
     uri: string;
     methods: Array<'GET' | 'HEAD' | 'POST' | 'PATCH' | 'PUT' | 'OPTIONS' | 'DELETE'>;
-    domain?: null | string;
+    domain?: null | string | undefined;
 }
 
 export interface Config {
@@ -33,7 +33,7 @@ export interface Config {
     baseUrl: string;
     baseProtocol: 'http' | 'https';
     baseDomain: string;
-    basePort?: number | null;
+    basePort?: number | null | undefined;
     defaultParameters: {
         [_: string]: string | number;
     };
@@ -46,7 +46,8 @@ export class Router extends String {
     hydrateUrl(): string;
     matchUrl(): boolean;
     constructQuery(): string;
-    current(name?: string): Route;
+    current(): string;
+    current(name: string): boolean;
     check(name: string): boolean;
     extractParams(uri: string, template: string, delimiter: string): NormalizedParams;
     get params(): NormalizedParams;
@@ -56,5 +57,6 @@ export class Router extends String {
     trimParam(param: string): string;
     valueOf(): string;
 }
-
-export default function route(name: string, params?: InputParams, absolute?: boolean, customZiggy?: Config): Router;
+declare function route(): Router;
+declare function route(name: string, params?: InputParams, absolute?: boolean, customZiggy?: Config): string;
+export default route;
